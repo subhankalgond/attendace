@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Student Attendance</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Student Attendance ✅</h1>
+
+      <section class="controls">
+        <label>
+          Date:
+          <input type="date" id="datePicker" />
+        </label>
+
+        <div class="buttons">
+          <button id="saveBtn">Save</button>
+          <button id="exportBtn">Export CSV</button>
+          <input type="file" id="importFile" accept="text/csv" style="display:none" />
+          <button id="importBtn">Import CSV</button>
+          <button id="clearBtn" title="Clear all saved attendance">Clear All</button>
+        </div>
+      </section>
+
+      <section class="add-student">
+        <input id="studentRoll" placeholder="Roll number" />
+        <input id="studentName" placeholder="Student name" />
+        <button id="addStudentBtn">Add Student</button>
+      </section>
+
+      <section class="attendance-list">
+        <table id="studentsTable">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Student</th>
+              <th>Present</th>
+              <th>Attendance %</th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- rows inserted by JS -->
+          </tbody>
+        </table>
+      </section>
+
+      <footer class="notes">
+        <small>Attendance is stored locally in your browser (localStorage). Export to CSV to back up or share.</small>
+      </footer>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

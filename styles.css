@@ -1,0 +1,22 @@
+*{box-sizing:border-box;font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif}
+:root{--accent:#1e90ff;--muted:#666}
+body{margin:0;background:#f6f8fb;color:#111}
+.container{max-width:900px;margin:32px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+h1{margin:0 0 16px}
+.controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.controls label{font-weight:600;color:var(--muted)}
+.controls input[type=date]{padding:6px;border-radius:6px;border:1px solid #ddd}
+.buttons{display:flex;gap:8px}
+button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+button[title]{background:#f44336}
+.add-student{display:flex;gap:8px;margin-bottom:12px}
+.add-student input{flex:1;padding:8px;border:1px solid #ddd;border-radius:6px}
+.attendance-list table{width:100%;border-collapse:collapse}
+.attendance-list th, .attendance-list td{padding:10px;border-bottom:1px solid #eee;text-align:left}
+.attendance-list tbody tr:nth-child(even){background:#fafbfd}
+.present-toggle{cursor:pointer;width:22px;height:22px;border-radius:50%;display:inline-block;border:2px solid #ddd;vertical-align:middle}
+.present-toggle.on{background:var(--accent);border-color:var(--accent)}
+.absent-toggle{cursor:pointer;width:22px;height:22px;border-radius:50%;display:inline-block;border:2px solid #ddd;vertical-align:middle;margin-left:8px}
+.absent-toggle.on{background:#f44336;border-color:#f44336}
+.notes{margin-top:12px;color:var(--muted)}
+@media(max-width:640px){.controls{flex-direction:column;align-items:stretch}.buttons{justify-content:space-between} }
