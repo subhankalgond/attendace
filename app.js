@@ -123,9 +123,34 @@ function setStatus(id, state){
   render();
 }
 
-// export rows: studentId,studentName,date,present(1/0)
+// export rows: studentId,studentRoll,studentName,date,present(1/0)
 function exportCSV(){
-  const lines = ['studentId,studentRoll,studentName,date,present'];
+  const date = datePicker.value;
+  if (!date) return alert('Pick a date to export');
+  const day = attendance[date] || {};
+  // If no recorded values for that date, warn
+  const hasAny = Object.keys(day).length > 0;
+  if (!hasAny) return alert('No attendance recorded for the selected date');
+
+  const lines = ['studentRoll,studentName,date,present'];
+  for (const s of students){
+    const val = attendance[date] && attendance[date][s.id];
+    let p;
+    if (val === 'present' || val === true) p = '1';
+    else if (val === 'absent' || val === false) p = '0';
+    else p = '';
+    lines.push(`"${(s.roll||'').replace(/"/g,'""')}","${s.name.replace(/"/g,'""')}",${date},${p}`);
+  }
+  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `attendance_${date}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportAllCSV(){
+  const lines = ['studentRoll,studentName,date,present'];
   for (const d of Object.keys(attendance).sort()){
     for (const s of students){
       const val = attendance[d][s.id];
@@ -133,13 +158,14 @@ function exportCSV(){
       if (val === 'present' || val === true) p = '1';
       else if (val === 'absent' || val === false) p = '0';
       else p = '';
-      lines.push(`${s.id},"${(s.roll||'').replace(/"/g,'""')}","${s.name.replace(/"/g,'""')}",${d},${p}`);
+      lines.push(`"${(s.roll||'').replace(/"/g,'""')}","${s.name.replace(/"/g,'""')}",${d},${p}`);
     }
   }
   const blob = new Blob([lines.join('\n')], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'attendance_export.csv'; a.click();
+  a.href = url; a.download = 'attendance_all_dates.csv';
+  a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -157,20 +183,20 @@ function parseCSVImport(text){
   if (lines.length === 0) return alert('CSV seems empty');
   const header = lines.shift().split(',').map(h=>h.trim().toLowerCase());
   const idxStudentId = header.indexOf('studentid');
-  const idxStudentName = header.indexOf('studentname');
   const idxStudentRoll = header.indexOf('studentroll');
+  const idxStudentName = header.indexOf('studentname');
   const idxDate = header.indexOf('date');
   const idxPresent = header.indexOf('present');
-  if (idxStudentId < 0 || idxDate < 0 || idxPresent < 0){
-    return alert('CSV must include studentId, date and present columns (studentName and studentRoll optional)');
+  if (idxDate < 0 || idxPresent < 0 || (idxStudentId < 0 && idxStudentRoll < 0 && idxStudentName < 0)){
+    return alert('CSV must include date and present columns, and at least one of studentRoll or studentName or studentId');
   }
 
   for (const raw of lines){
     // simple CSV split (handles quoted fields)
     const parts = splitCSVLine(raw);
-    const sid = parts[idxStudentId];
-    const sname = (idxStudentName >= 0 ? parts[idxStudentName] : '') || 'Unknown';
-    const sroll = (idxStudentRoll >= 0 ? parts[idxStudentRoll] : '') || '';
+    const sidCandidate = idxStudentId >= 0 ? parts[idxStudentId] : undefined;
+    const sroll = idxStudentRoll >= 0 ? (parts[idxStudentRoll] || '').trim() : '';
+    const sname = idxStudentName >= 0 ? (parts[idxStudentName] || '').trim() : (sroll ? '' : 'Unknown');
     const date = parts[idxDate];
     const rawP = (parts[idxPresent] || '').toString().trim();
     let p;
@@ -178,17 +204,23 @@ function parseCSVImport(text){
     else if (rawP === '0' || rawP.toLowerCase() === 'false' || rawP.toLowerCase() === 'a' || rawP.toLowerCase() === 'absent') p = 'absent';
     else p = undefined;
 
-    // ensure or update student
-    const existing = students.find(s=>s.id===sid);
+    // find matching student: prefer id, then roll, then name
+    let existing;
+    if (sidCandidate) existing = students.find(s=>s.id===sidCandidate);
+    if (!existing && sroll) existing = students.find(s=>s.roll===sroll);
+    if (!existing && sname) existing = students.find(s=>s.name===sname);
+
     if (existing){
       if (sname) existing.name = sname;
       if (sroll) existing.roll = sroll;
     } else {
-      students.push({id:sid, name:sname, roll:sroll});
+      const newId = 's_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+      students.push({id:newId, name:sname || 'Unknown', roll:sroll});
+      existing = students[students.length-1];
     }
 
     if (!attendance[date]) attendance[date] = {};
-    if (typeof p !== 'undefined') attendance[date][sid] = p;
+    if (typeof p !== 'undefined') attendance[date][existing.id] = p;
   }
   saveAll();
   render();
@@ -222,6 +254,8 @@ studentNameInput.addEventListener('keydown', e=>{ if (e.key === 'Enter') addStud
 studentRollInput.addEventListener('keydown', e=>{ if (e.key === 'Enter') addStudent(); });
 saveBtn.addEventListener('click', ()=>{ saveAll(); alert('Saved'); });
 exportBtn.addEventListener('click', exportCSV);
+const exportAllBtn = document.getElementById('exportAllBtn');
+if (exportAllBtn) exportAllBtn.addEventListener('click', exportAllCSV);
 importBtn.addEventListener('click', ()=>importFile.click());
 importFile.addEventListener('change', e=>{ const f = e.target.files[0]; if (f) importCSVFile(f); importFile.value = ''; });
 clearBtn.addEventListener('click', clearAll);

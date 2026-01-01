@@ -6,7 +6,8 @@ Features
 - Add / remove students
 - Choose a date and mark each student Present (toggle)
 - Save data to localStorage (auto-save on actions)
-- Export attendance as CSV and import CSV backups
+- Export attendance as CSV (default exports the selected date only). Use "Export All Dates" to download all recorded dates.
+- Import CSV backups
 - Clear all data
 
 How to use
@@ -18,7 +19,7 @@ How to use
 
 Notes
 - Attendance is stored locally; export if you need to move data to another device.
-- CSV format: columns `studentId,studentRoll,studentName,date,present` (present: 1 or 0)
+- CSV format: columns `studentRoll,studentName,date,present` (present: 1 or 0). The app no longer includes or requires `studentId` in exports — roll or name is used to match students on import.
 
 File list
 - `index.html` - main UI
